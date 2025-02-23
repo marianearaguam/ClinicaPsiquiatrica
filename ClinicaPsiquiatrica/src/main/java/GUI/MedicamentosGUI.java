@@ -4,10 +4,20 @@
  */
 package GUI;
 
+import DAO.ConexaoDAO;
 import DAO.MedicamentoDAO;
 import DTO.MedicamentoDTO;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -16,13 +26,70 @@ import javax.swing.table.DefaultTableModel;
  */
 public class MedicamentosGUI extends javax.swing.JFrame {
 private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
+private ConexaoDAO conexaoDAO = new ConexaoDAO();
+
+private int idMedicamentoSelecionado = -1;  // Variável global para armazenar o ID
     /**
      * Creates new form MedicamentosGUI
      */
     public MedicamentosGUI() {
         initComponents();
-    }
+        listarMedicamentos();
 
+    }
+private void inicializarTabela() {
+    // A tabela já foi criada pelo GUI, não é necessário criar uma nova instância
+    DefaultTableModel model = new DefaultTableModel(
+        new Object[][]{}, 
+        new String[]{"ID", "Nome", "Descricao", "Quantidade", "Preco", "Fornecedor", "Data de Validade"}
+    );
+    tableMedicamentos.setModel(model); // Associa o modelo à tabela existente
+
+    // Definindo o modo de seleção
+    tableMedicamentos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    
+    // Adicionando o listener para capturar a seleção da tabela
+    ListSelectionModel selectionModel = tableMedicamentos.getSelectionModel();
+    selectionModel.addListSelectionListener(new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            // Verifica se a seleção é válida (não está vazio)
+            if (!e.getValueIsAdjusting() && tableMedicamentos.getSelectedRow() != -1) {
+                carregarCamposMedicamento(); // Atualiza os campos ao selecionar uma linha
+            }
+        }
+    });
+}
+public boolean executarComandoSQL(String sql, Object... parametros) {
+    Connection con = null;
+    PreparedStatement pst = null;
+
+    try {
+        con = new ConexaoDAO().getConnection();
+        pst = con.prepareStatement(sql);
+
+        // Definir os parâmetros dinamicamente
+        for (int i = 0; i < parametros.length; i++) {
+            pst.setObject(i + 1, parametros[i]);
+            System.out.println("Parâmetro [" + (i + 1) + "]: " + parametros[i]);  // 🔥 Debug
+        }
+
+        int linhasAfetadas = pst.executeUpdate();
+        System.out.println("Linhas afetadas: " + linhasAfetadas);  // 🔥 Debug
+
+        return linhasAfetadas > 0;
+    } catch (SQLException e) {
+        System.err.println("Erro ao executar SQL: " + e.getMessage());
+        return false;
+    } finally {
+        try {
+            if (pst != null) pst.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            System.err.println("Erro ao fechar conexão: " + e.getMessage());
+        }
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -115,6 +182,7 @@ private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tableMedicamentos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tableMedicamentos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tableMedicamentosMouseClicked(evt);
@@ -250,7 +318,11 @@ private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
     }//GEN-LAST:event_buttonCadastrarActionPerformed
 
     private void buttonAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAtualizarActionPerformed
-       atualizarMedicamento();
+    try {
+        atualizarMedicamento();
+    } catch (SQLException ex) {
+        Logger.getLogger(MedicamentosGUI.class.getName()).log(Level.SEVERE, null, ex);
+    }
       listarMedicamentos();
       carregarCamposMedicamento();
     }//GEN-LAST:event_buttonAtualizarActionPerformed
@@ -266,8 +338,20 @@ private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
     }//GEN-LAST:event_buttonCarregarCamposActionPerformed
 
     private void tableMedicamentosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableMedicamentosMouseClicked
-        carregarCamposMedicamento();
-        listarMedicamentos();
+         int selectedRow = tableMedicamentos.getSelectedRow();
+    System.out.println("📌 Linha clicada: " + selectedRow);
+
+    if (selectedRow != -1) {
+        txtNome.setText(tableMedicamentos.getValueAt(selectedRow, 1).toString());
+        txtDescricao.setText(tableMedicamentos.getValueAt(selectedRow, 2).toString());
+        txtQuantidadeEstoque.setText(tableMedicamentos.getValueAt(selectedRow, 3).toString());
+        txtPreco.setText(tableMedicamentos.getValueAt(selectedRow, 4).toString());
+        txtFornecedor.setText(tableMedicamentos.getValueAt(selectedRow, 5).toString());
+        txtDataValidade.setText(tableMedicamentos.getValueAt(selectedRow, 6).toString());
+        
+
+        System.out.println("📌 Medicamento carregado: " + txtNome.getText());
+    }
     }//GEN-LAST:event_tableMedicamentosMouseClicked
 
     /**
@@ -330,125 +414,180 @@ private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
     private javax.swing.JTextField txtPreco;
     private javax.swing.JTextField txtQuantidadeEstoque;
     // End of variables declaration//GEN-END:variables
-private void cadastrarMedicamento() {
+private static final String URL = "jdbc:mysql://127.0.0.1::3206/clinicapsiqui";
+private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
+private static final String SENHA = "mirandiba10"; // Substitua pela sua senha do MySQL
+
+    private void cadastrarMedicamento() {
+    System.out.println("✅ Método cadastrarMedicamento() foi chamado!");
     // Capturando os dados do formulário
-    String nome = Nometxt.getText();
-    String descricao = Descricaotxt.getText();
-    String quantidadeEstoque = txtQuantidadeEstoque.getText();
-    String preco = Precotxt.getText();
-    String fornecedor = Fornecedortxt.getText();
-    String dataValidade = txtDataValidade.getText();
+    String nome = txtNome.getText();
+    String descricao = txtDescricao.getText().trim();
+    String quantidade = txtQuantidadeEstoque.getText().trim();
+    String preco = txtPreco.getText().trim();
+    String fornecedor = txtFornecedor.getText().trim();
+    String dataValidade = txtDataValidade.getText().trim();
+
+    if (preco.isEmpty() || fornecedor.isEmpty() || quantidade.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "❌ Preencha todos os campos obrigatórios!", "Erro", JOptionPane.ERROR_MESSAGE);
+        System.out.println("❌ ERRO: Algum campo obrigatório está vazio!");
+        return;
+    }
 
     try {
-        // Validação básica
-        if (nome.isEmpty() || descricao.isEmpty() || quantidadeEstoque.isEmpty() || preco.isEmpty() || fornecedor.isEmpty() || dataValidade.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "❌ Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         // Criando o objeto MedicamentoDTO
-        MedicamentoDTO novoMedicamento = new MedicamentoDTO( nome, descricao, quantidadeEstoque,preco, fornecedor, dataValidade);
+        MedicamentoDTO novoMedicamento = new MedicamentoDTO(0, nome, descricao, quantidade, preco, fornecedor, dataValidade);
+        
+        System.out.println("Dados capturados do formulario: " + novoMedicamento.toString());
 
-        // Chamando o método da DAO para adicionar no banco
-        MedicamentoDAO.adicionarMedicamento(novoMedicamento);
+        // Conectando ao banco e inserindo o medicamento
+        String query = "INSERT INTO medicamentos (nome, descricao, quantidade, preco, fornecedor, dataValidade) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(URL,USUARIO,SENHA);
+             PreparedStatement pst = conn.prepareStatement(query)) {
 
-        JOptionPane.showMessageDialog(null, "✅ Medicamento cadastrado com sucesso!");
-        listarMedicamentos(); // Atualiza a tabela
-        limparCamposMedicamento();
+            pst.setString(1, nome);
+            pst.setString(2, descricao);
+            pst.setString(3, quantidade);
+            pst.setString(4, preco);
+            pst.setString(5, fornecedor);
+            pst.setString(6, dataValidade);
+
+            pst.executeUpdate();  // Executa a inserção
+
+            JOptionPane.showMessageDialog(null, "Medicamento cadastrado com sucesso.");
+            listarMedicamentos(); // Atualiza a tabela
+            limparCamposMedicamento();
+        }
     } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "❌ Erro ao cadastrar medicamento: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Erro ao cadastrar medicamento: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
     }
 }
-private void atualizarMedicamento() {
-    int selectedRow = tableMedicamentos.getSelectedRow();
-    if (selectedRow != -1) {
-        int id = (int) tableMedicamentos.getValueAt(selectedRow, 0);
-        String nome = Nometxt.getText();
-        String descricao = Descricaotxt.getText();
-        String quantidadeEstoque = txtQuantidadeEstoque.getText();
-        String preco = Precotxt.getText();
-        String fornecedor = Fornecedortxt.getText();
-        String dataValidade = txtDataValidade.getText();
+private void atualizarMedicamento() throws SQLException {
+    int selectedRow = tableMedicamentos.getSelectedRow(); // 🔹 Obtém a linha selecionada
+    System.out.println("📌 Tentando atualizar... Linha selecionada: " + selectedRow);
 
-        try {
-            MedicamentoDTO medicamentoAtualizado = new MedicamentoDTO(nome, descricao, quantidadeEstoque, preco, fornecedor, dataValidade);
+    if (selectedRow == -1) {  // Se nenhuma linha estiver selecionada, exibe erro
+        JOptionPane.showMessageDialog(null, "❌ Nenhum medicamento foi selecionado!", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-            // Atualiza no banco
-            MedicamentoDAO.atualizarMedicamento(medicamentoAtualizado);
+    // Obtém o ID do Medicamento selecionado
+    int idMedicamentoSelecionado = (int) tableMedicamentos.getValueAt(selectedRow, 0);
+    System.out.println("📌 ID do medicamento selecionado: " + idMedicamentoSelecionado);
 
-            JOptionPane.showMessageDialog(null, "✅ Medicamento atualizado com sucesso!");
-            listarMedicamentos();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "❌ Erro ao atualizar medicamento: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        }
+    if (idMedicamentoSelecionado <= 0) {
+        JOptionPane.showMessageDialog(null, "ID do medicamento inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Obtém os dados dos campos
+    String nome = txtNome.getText();
+    String descricao = txtDescricao.getText();
+    String quantidade = txtQuantidadeEstoque.getText();
+    String preco = txtPreco.getText();
+    String fornecedor = txtFornecedor.getText();
+    String dataValidade = txtDataValidade.getText();
+    
+
+    if (nome.isEmpty() || preco.isEmpty() || fornecedor.isEmpty() || quantidade.isEmpty() || descricao.isEmpty() || dataValidade.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "❌ Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // SQL para atualizar o Medicamento
+    String query = "UPDATE medicamentos SET nome = ?, descricao = ?, quantidade = ?, preco = ?, fornecedor = ?, dataValidade = ? WHERE idMedicamento = ?";
+
+    boolean sucesso = conexaoDAO.executarComandoSQL(query, nome, descricao, quantidade, fornecedor, preco, dataValidade, idMedicamentoSelecionado);
+
+    if (sucesso) {
+        JOptionPane.showMessageDialog(null, "✅ Medicamento atualizado com sucesso.");
+        listarMedicamentos();  // Atualiza a tabela
     } else {
-        JOptionPane.showMessageDialog(null, "⚠️ Selecione um medicamento para atualizar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(null, "❌ Erro ao atualizar o medicamento.", "Erro", JOptionPane.ERROR_MESSAGE);
     }
 }
+
+
 private void excluirMedicamento() {
-    int selectedRow = tableMedicamentos.getSelectedRow();
-    if (selectedRow != -1) {
-        int idMedicamento = (int) tableMedicamentos.getValueAt(selectedRow, 0);
-        int confirmacao = JOptionPane.showConfirmDialog(null, "🛑 Deseja realmente excluir este medicamento?", "Confirmação", JOptionPane.YES_NO_OPTION);
+    
+    if (idMedicamentoSelecionado == -1) {  // Verifica se um medicamento foi selecionado
+        JOptionPane.showMessageDialog(null, "Selecione um medicamento para excluir.", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        if (confirmacao == JOptionPane.YES_OPTION) {
-            MedicamentoDAO.excluirMedicamento(idMedicamento);
-            listarMedicamentos();
-            JOptionPane.showMessageDialog(null, "✅ Medicamento excluído com sucesso!");
-        }
+    System.out.println("ID do medicamento a excluir: " + idMedicamentoSelecionado);  // 🔥 Debug
+    System.out.println("Tentando excluir o ID: " + idMedicamentoSelecionado);
+
+    String query = "DELETE FROM medicamentos WHERE idMedicamento = ?";
+
+    // Chama o método do ConexaoDAO para executar a exclusão
+    boolean sucesso = conexaoDAO.executarComandoSQL(query, idMedicamentoSelecionado);
+
+    if (sucesso) {
+        JOptionPane.showMessageDialog(null, "Medicamento excluído com sucesso.");
+        listarMedicamentos();  // Atualiza a lista de pacientes
+        idMedicamentoSelecionado = -1;  // Reseta o ID para evitar exclusões acidentais
     } else {
-        JOptionPane.showMessageDialog(null, "⚠️ Selecione um medicamento para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Erro ao excluir o medicamento.", "Erro", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+
+private void listarMedicamentos() {
+    try {
+        
+        String query = "SELECT * FROM medicamentos"; 
+
+        try (Connection conn = DriverManager.getConnection(URL, USUARIO, SENHA);
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) tableMedicamentos.getModel();
+            model.setNumRows(0); // Limpa a tabela antes de adicionar novos dados
+
+            while (rs.next()) {
+                Object[] rowData = {
+                    rs.getInt("idMedicamento"),
+                    rs.getString("nome"),
+                    rs.getString("descricao"),
+                    rs.getString("quantidade"),
+                    rs.getString("preco"),
+                    rs.getString("fornecedor"),
+                    rs.getString("dataValidade"),
+                };
+                model.addRow(rowData);
+            }
+            model.fireTableDataChanged();
+            tableMedicamentos.repaint(); // Atualiza a tabela
+            tableMedicamentos.revalidate();
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Erro ao carregar os medicamentos: " + e.getMessage());
     }
 }
 private void carregarCamposMedicamento() {
-    int setar = tableMedicamentos.getSelectedRow();
-    
-    if (setar >= 0) {
-        Nometxt.setText(tableMedicamentos.getModel().getValueAt(setar, 1).toString());
-        Descricaotxt.setText(tableMedicamentos.getModel().getValueAt(setar, 2).toString());
-        txtQuantidadeEstoque.setText(tableMedicamentos.getModel().getValueAt(setar, 3).toString());
-        Precotxt.setText(tableMedicamentos.getModel().getValueAt(setar, 4).toString());
-        Fornecedortxt.setText(tableMedicamentos.getModel().getValueAt(setar, 5).toString());
-        txtDataValidade.setText(tableMedicamentos.getModel().getValueAt(setar, 6).toString());
+    int selectedRow = tableMedicamentos.getSelectedRow();
+    if (selectedRow != -1) {
+        idMedicamentoSelecionado = (int) tableMedicamentos.getValueAt(selectedRow, 0); // ID na primeira coluna
+        System.out.println("ID do medicamento armazenado: " + idMedicamentoSelecionado);  // 🔥 Debug
+
+        txtNome.setText(tableMedicamentos.getValueAt(selectedRow, 1).toString());
+        txtDescricao.setText(tableMedicamentos.getValueAt(selectedRow, 2).toString());
+        txtQuantidadeEstoque.setText(tableMedicamentos.getValueAt(selectedRow, 3).toString());
+        txtPreco.setText(tableMedicamentos.getValueAt(selectedRow, 4).toString());
+        txtFornecedor.setText(tableMedicamentos.getValueAt(selectedRow, 5).toString());
+        txtDataValidade.setText(tableMedicamentos.getValueAt(selectedRow, 6).toString());
     } else {
-        JOptionPane.showMessageDialog(null, "⚠️ Nenhuma linha selecionada!", "Aviso", JOptionPane.WARNING_MESSAGE);
+        System.out.println("Nenhum medicamento selecionado.");
     }
 }
-private void listarMedicamentos() {
-    try {
-        List<MedicamentoDTO> medicamentos = MedicamentoDAO.listarMedicamentos();
-        System.out.println("📌 Medicamentos encontrados no banco: " + medicamentos.size());
 
-        DefaultTableModel model = (DefaultTableModel) tableMedicamentos.getModel();
-        model.setNumRows(0); // Limpa a tabela antes de adicionar novos dados
-
-        for (MedicamentoDTO medicamento : medicamentos) {
-            System.out.println("✅ Adicionando: " + medicamento.getNome());
-            Object[] rowData = {
-                medicamento.getId(),
-                medicamento.getNome(),
-                medicamento.getDescricao(),
-                medicamento.getQuantidadeEstoque(),
-                medicamento.getPreco(),
-                medicamento.getFornecedor(),
-                medicamento.getDataValidade()
-            };
-            model.addRow(rowData);
-        }
-
-        tableMedicamentos.repaint(); // Atualiza a tabela
-        tableMedicamentos.revalidate();
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "❌ Erro ao carregar os medicamentos: " + e.getMessage());
-    }
-}
 private void limparCamposMedicamento() {
-    Nometxt.setText(null);
-    Descricaotxt.setText(null);
+    txtNome.setText(null);
+    txtDescricao.setText(null);
     txtQuantidadeEstoque.setText(null);
-    Precotxt.setText(null);
-    Fornecedortxt.setText(null);
+    txtPreco.setText(null);
+    txtFornecedor.setText(null);
     txtDataValidade.setText(null);
-    Nometxt.requestFocus();
 }
 }

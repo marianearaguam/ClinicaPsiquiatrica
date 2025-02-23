@@ -24,10 +24,10 @@ public class MedicamentoDAO {
             try (PreparedStatement pst = connection.prepareStatement(query)) {
                 pst.setString(1, medicamento.getNome());
                 pst.setString(2, medicamento.getDescricao());
-                pst.setInt(3, medicamento.getQuantidadeEstoque());
-                pst.setDouble(4, medicamento.getPreco());
+                pst.setString(3, medicamento.getQuantidadeEstoque());
+                pst.setString(4, medicamento.getPreco());
                 pst.setString(5, medicamento.getFornecedor());
-                pst.setDate(6, medicamento.getDataValidade());
+                pst.setString(6, medicamento.getDataValidade());
                 pst.executeUpdate();
             }
         } catch (SQLException e) {
@@ -46,10 +46,10 @@ public class MedicamentoDAO {
                         rs.getInt("idMedicamento"),
                         rs.getString("nome"),
                         rs.getString("descricao"),
-                        rs.getInt("quantidadeEstoque"),
-                        rs.getDouble("preco"),
+                        rs.getString("quantidadeEstoque"),
+                        rs.getString("preco"),
                         rs.getString("fornecedor"),
-                        rs.getDate("dataValidade")
+                        rs.getString("dataValidade")
                     );
                     medicamentos.add(medicamento);
                 }
@@ -67,10 +67,10 @@ public class MedicamentoDAO {
             try (PreparedStatement ps = connection.prepareStatement(query)) {
                 ps.setString(1, medicamento.getNome());
                 ps.setString(2, medicamento.getDescricao());
-                ps.setInt(3, medicamento.getQuantidadeEstoque());
-                ps.setDouble(4, medicamento.getPreco());
+                ps.setString(3, medicamento.getQuantidadeEstoque());
+                ps.setString(4, medicamento.getPreco());
                 ps.setString(5, medicamento.getFornecedor());
-                ps.setDate(6, medicamento.getDataValidade());
+                ps.setString(6, medicamento.getDataValidade());
                 ps.setInt(7, medicamento.getIdMedicamento());
                 ps.executeUpdate();
             }
