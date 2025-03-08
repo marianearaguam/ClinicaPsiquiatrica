@@ -12,7 +12,7 @@ import javax.swing.JTextField;
  * @author maria
  */
 public class GUIlogin extends javax.swing.JFrame {
-    private UsuarioDAO usuarioDao = new UsuarioDAO();
+    private UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     /**
      * Creates new form GUIlogin

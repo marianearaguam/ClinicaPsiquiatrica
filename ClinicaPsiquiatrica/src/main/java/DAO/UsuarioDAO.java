@@ -9,6 +9,7 @@ package DAO;
  * @author carlo
  */
 
+import ConexaoBD.Conexao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +22,7 @@ public boolean validarlogin(String nome, String senha) throws SQLException {
         ResultSet rs = null;
         
         try {
-            conexao = new ConexaoDAO().getConnection();
+            conexao = new Conexao().getConnection();
             String sql = "SELECT * from entrar where usuario = ? and senha = ?";
             statement = conexao.prepareStatement(sql);
             statement.setString(1, nome);

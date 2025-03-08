@@ -4,7 +4,7 @@
  */
 package GUI;
 
-import DAO.ConexaoDAO;
+import ConexaoBD.Conexao;
 import DAO.MedicamentoDAO;
 import DTO.MedicamentoDTO;
 import java.sql.Connection;
@@ -26,7 +26,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class MedicamentosGUI extends javax.swing.JFrame {
 private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
-private ConexaoDAO conexaoDAO = new ConexaoDAO();
+private Conexao conexao = new Conexao();
 
 private int idMedicamentoSelecionado = -1;  // Variável global para armazenar o ID
     /**
@@ -65,7 +65,7 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
     PreparedStatement pst = null;
 
     try {
-        con = new ConexaoDAO().getConnection();
+        con = new Conexao().getConnection();
         pst = con.prepareStatement(sql);
 
         // Definir os parâmetros dinamicamente
@@ -130,45 +130,21 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
         jLabel1.setText("Medicamentos");
 
         Nometxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        Nometxt.setForeground(new java.awt.Color(0, 0, 0));
         Nometxt.setText("Nome:");
 
         Descricaotxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        Descricaotxt.setForeground(new java.awt.Color(0, 0, 0));
         Descricaotxt.setText("Descrição:");
 
         QuantidadeEstoquetxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        QuantidadeEstoquetxt.setForeground(new java.awt.Color(0, 0, 0));
         QuantidadeEstoquetxt.setText("Quantidade:");
 
         Precotxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        Precotxt.setForeground(new java.awt.Color(0, 0, 0));
         Precotxt.setText("Preço:");
 
-        txtNome.setBackground(new java.awt.Color(255, 255, 255));
-        txtNome.setForeground(new java.awt.Color(0, 0, 0));
-
-        txtDescricao.setBackground(new java.awt.Color(255, 255, 255));
-        txtDescricao.setForeground(new java.awt.Color(0, 0, 0));
-
-        txtQuantidadeEstoque.setBackground(new java.awt.Color(255, 255, 255));
-        txtQuantidadeEstoque.setForeground(new java.awt.Color(0, 0, 0));
-
-        txtPreco.setBackground(new java.awt.Color(255, 255, 255));
-        txtPreco.setForeground(new java.awt.Color(0, 0, 0));
-
-        txtFornecedor.setBackground(new java.awt.Color(255, 255, 255));
-        txtFornecedor.setForeground(new java.awt.Color(0, 0, 0));
-
         Fornecedortxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        Fornecedortxt.setForeground(new java.awt.Color(0, 0, 0));
         Fornecedortxt.setText("Fornecedor:");
 
-        txtDataValidade.setBackground(new java.awt.Color(255, 255, 255));
-        txtDataValidade.setForeground(new java.awt.Color(0, 0, 0));
-
         DataValidadetxt.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        DataValidadetxt.setForeground(new java.awt.Color(0, 0, 0));
         DataValidadetxt.setText("Data de Validade:");
 
         tableMedicamentos.setModel(new javax.swing.table.DefaultTableModel(
@@ -414,9 +390,9 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
     private javax.swing.JTextField txtPreco;
     private javax.swing.JTextField txtQuantidadeEstoque;
     // End of variables declaration//GEN-END:variables
-private static final String URL = "jdbc:mysql://127.0.0.1::3206/clinicapsiqui";
+private static final String URL = "jdbc:mysql://127.0.0.1:3306/clinicapsiqui";
 private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
-private static final String SENHA = "mirandiba10"; // Substitua pela sua senha do MySQL
+private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL
 
     private void cadastrarMedicamento() {
     System.out.println("✅ Método cadastrarMedicamento() foi chamado!");
@@ -497,7 +473,7 @@ private void atualizarMedicamento() throws SQLException {
     // SQL para atualizar o Medicamento
     String query = "UPDATE medicamentos SET nome = ?, descricao = ?, quantidade = ?, preco = ?, fornecedor = ?, dataValidade = ? WHERE idMedicamento = ?";
 
-    boolean sucesso = conexaoDAO.executarComandoSQL(query, nome, descricao, quantidade, fornecedor, preco, dataValidade, idMedicamentoSelecionado);
+    boolean sucesso = conexao.executarComandoSQL(query, nome, descricao, quantidade, fornecedor, preco, dataValidade, idMedicamentoSelecionado);
 
     if (sucesso) {
         JOptionPane.showMessageDialog(null, "✅ Medicamento atualizado com sucesso.");
@@ -521,7 +497,7 @@ private void excluirMedicamento() {
     String query = "DELETE FROM medicamentos WHERE idMedicamento = ?";
 
     // Chama o método do ConexaoDAO para executar a exclusão
-    boolean sucesso = conexaoDAO.executarComandoSQL(query, idMedicamentoSelecionado);
+    boolean sucesso = conexao.executarComandoSQL(query, idMedicamentoSelecionado);
 
     if (sucesso) {
         JOptionPane.showMessageDialog(null, "Medicamento excluído com sucesso.");

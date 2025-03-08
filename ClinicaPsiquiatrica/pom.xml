@@ -23,8 +23,9 @@
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
+        <!-- Ajustar para a versão do JDK que você está usando -->
+        <maven.compiler.source>21</maven.compiler.source>  <!-- Ou a versão do JDK que você tem -->
+        <maven.compiler.target>21</maven.compiler.target>  <!-- Ajustar para a versão do JDK -->
         <exec.mainClass>com.mycompany.clinicapsiquiatrica.ClinicaPsiquiatrica</exec.mainClass>
     </properties>
 </project>
