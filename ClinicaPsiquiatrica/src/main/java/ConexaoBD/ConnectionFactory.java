@@ -11,7 +11,7 @@ public class ConnectionFactory {
     // Configurações do banco de dados
     private static final String URL = "jdbc:mysql://127.0.0.1:3306/clinicapsiqui";
     private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
-    private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL
+    private static final String SENHA = "mirandiba10"; // Substitua pela sua senha do MySQL
 
     // Método para obter uma conexão com o banco de dados
 
