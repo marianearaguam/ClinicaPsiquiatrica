@@ -404,7 +404,7 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
     // Configurações do banco de dados
     private static final String URL = "jdbc:mysql://localhost:3306/clinicapsiqui";
     private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
-    private static final String SENHA = "gustavo123"; // Substitua pela sua senha do MySQL
+    private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL
 
     private void cadastrarMedicamento() {
     System.out.println("✅ Método cadastrarMedicamento() foi chamado!");
