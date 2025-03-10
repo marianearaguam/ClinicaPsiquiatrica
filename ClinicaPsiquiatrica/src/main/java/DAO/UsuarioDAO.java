@@ -23,7 +23,7 @@ public boolean validarlogin(String nome, String senha) throws SQLException {
         
         try {
             conexao = new Conexao().getConnection();
-            String sql = "SELECT * from entrar where usuario = ? and senha = ?";
+            String sql = "SELECT * from usuario where usuario = ? and senha = ?";
             statement = conexao.prepareStatement(sql);
             statement.setString(1, nome);
             statement.setString(2, senha);

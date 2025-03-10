@@ -238,6 +238,9 @@
               <Events>
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tableMedicamentosMouseClicked"/>
               </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tableMedicamentos.setModel(new DefaultTableModel(&#xd;&#xa;    new Object[][]{}, // Dados iniciais (vazios)&#xd;&#xa;    new String[]{&#xd;&#xa;        &quot;ID&quot;,           // Coluna para idMedicamento&#xd;&#xa;        &quot;Nome&quot;,         // Coluna para nome&#xd;&#xa;        &quot;Descri&#xe7;&#xe3;o&quot;,    // Coluna para descricao&#xd;&#xa;        &quot;Estoque&quot;,      // Coluna para quantidadeEstoque&#xd;&#xa;        &quot;Pre&#xe7;o&quot;,        // Coluna para preco&#xd;&#xa;        &quot;Fornecedor&quot;,   // Coluna para fornecedor&#xd;&#xa;        &quot;Validade&quot;      // Coluna para dataValidade&#xd;&#xa;    }&#xd;&#xa;));"/>
+              </AuxValues>
             </Component>
           </SubComponents>
         </Container>

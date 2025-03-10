@@ -25,7 +25,6 @@ import javax.swing.table.DefaultTableModel;
  * @author carlo
  */
 public class MedicamentosGUI extends javax.swing.JFrame {
-private MedicamentoDAO MedicamentoDAO = new MedicamentoDAO();
 private Conexao conexao = new Conexao();
 
 private int idMedicamentoSelecionado = -1;  // Variável global para armazenar o ID
@@ -41,7 +40,7 @@ private void inicializarTabela() {
     // A tabela já foi criada pelo GUI, não é necessário criar uma nova instância
     DefaultTableModel model = new DefaultTableModel(
         new Object[][]{}, 
-        new String[]{"ID", "Nome", "Descricao", "Quantidade", "Preco", "Fornecedor", "Data de Validade"}
+        new String[]{"ID", "Nome", "Descricao", "quantidade", "Preco", "Fornecedor", "Data de Validade"}
     );
     tableMedicamentos.setModel(model); // Associa o modelo à tabela existente
 
@@ -159,6 +158,18 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
             }
         ));
         tableMedicamentos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tableMedicamentos.setModel(new DefaultTableModel(
+            new Object[][]{}, // Dados iniciais (vazios)
+            new String[]{
+                "ID",           // Coluna para idMedicamento
+                "Nome",         // Coluna para nome
+                "Descrição",    // Coluna para descricao
+                "Estoque",      // Coluna para quantidadeEstoque
+                "Preço",        // Coluna para preco
+                "Fornecedor",   // Coluna para fornecedor
+                "Validade"      // Coluna para dataValidade
+            }
+        ));
         tableMedicamentos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tableMedicamentosMouseClicked(evt);
@@ -390,9 +401,10 @@ public boolean executarComandoSQL(String sql, Object... parametros) {
     private javax.swing.JTextField txtPreco;
     private javax.swing.JTextField txtQuantidadeEstoque;
     // End of variables declaration//GEN-END:variables
-private static final String URL = "jdbc:mysql://127.0.0.1:3306/clinicapsiqui";
-private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
-private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL
+    // Configurações do banco de dados
+    private static final String URL = "jdbc:mysql://localhost:3306/clinicapsiqui";
+    private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
+    private static final String SENHA = "gustavo123"; // Substitua pela sua senha do MySQL
 
     private void cadastrarMedicamento() {
     System.out.println("✅ Método cadastrarMedicamento() foi chamado!");
