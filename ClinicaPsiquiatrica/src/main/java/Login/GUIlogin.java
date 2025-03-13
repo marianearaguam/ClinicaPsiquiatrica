@@ -170,6 +170,7 @@ public class GUIlogin extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
+    //exibir 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -215,7 +216,7 @@ public class GUIlogin extends javax.swing.JFrame {
     private javax.swing.JTextField senhatxt;
     private javax.swing.JTextField usuariotxt;
     // End of variables declaration//GEN-END:variables
-
+//métodos getters e setters
 public JTextField getusuariotxt() {
         return usuariotxt;
     }

@@ -11,8 +11,8 @@ import java.sql.SQLException;
 public class Conexao {
     // Configurações do banco de dados
     private static final String URL = "jdbc:mysql://localhost:3306/clinicapsiqui";
-    private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL
-    private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL
+    private static final String USUARIO = "root"; // Substitua pelo seu usuário do MySQL - credencial de acesso
+    private static final String SENHA = "9T@ffy2008"; // Substitua pela sua senha do MySQL - credencial de acesso
 
     
     public static Connection getConnection() throws SQLException{
@@ -34,7 +34,7 @@ public class Conexao {
         } catch (SQLException e) {
             // Log do erro (pode ser melhorado com um sistema de logs)
             System.err.println("Erro ao executar comando SQL: " + e.getMessage());
-            e.printStackTrace(); // Mostra o stack trace completo para depuração
+            e.printStackTrace(); // Mostra o stack trace completo para depuração, mostra onde a linha foi afetada
             return false;
         }
     }

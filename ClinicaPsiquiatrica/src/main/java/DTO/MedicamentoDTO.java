@@ -17,7 +17,8 @@ public class MedicamentoDTO {
     private String preco;
     private String fornecedor;
     private String dataValidade;
-
+    
+//define um construtor. recebe vários parâmetros e inicializa os atributos da classe com os valores fornecidos.
     public MedicamentoDTO(int idMedicamento, String nome, String descricao, String quantidadeEstoque, String preco, String fornecedor, String dataValidade) {
         this.idMedicamento = idMedicamento;
         this.nome = nome;
